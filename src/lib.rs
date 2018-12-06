@@ -36,14 +36,47 @@ impl ProviderInstance for LocalProvider {
     fn sync(&mut self, library: SharedLibrary) -> Result<SyncResult, Error> {
         let scanner = scanner::Scanner::new(self.path.clone());
         let tracks = scanner.scan()?;
+        let albums: Vec<library::Album> = tracks
+            .iter()
+            .cloned()
+            .map(|track| track.into())
+            .filter(|album: &Option<library::Album>| album.is_some())
+            .map(|album| album.unwrap())
+            .fold(Vec::new(), |mut albums, album| {
+                if albums
+                    .iter()
+                    .find(|a| a.title == album.title)
+                    .is_none() {
+                    albums.push(album);
+                }
+                albums
+            });
+        let albums: Vec<library::Album> = albums
+            .into_iter()
+            .map(|mut album| -> Result<library::Album, Error> {
+                library.add_album(&mut album)?;
+                Ok(album)
+            })
+            .filter(|a| a.is_ok())
+            .map(|a| a.unwrap())
+            .collect();
         let mut tracks = tracks
             .into_iter()
             .map(library::Track::from)
+            .map(|mut t| {
+                if let Some(track_album) = &t.album {
+                    let album = albums.iter().find(|a| a.title == track_album.title);
+                    if let Some(album) = album {
+                        t.album_id = album.id;
+                    }
+                }
+                t
+            })
             .collect();
-        library.add_tracks(&mut tracks);
+        library.add_tracks(&mut tracks)?;
         Ok(SyncResult {
             tracks: tracks.len(),
-            albums: 0,
+            albums: albums.len(),
             artists: 0,
             playlists: 0
         })
@@ -97,5 +130,30 @@ impl From<scanner::Track> for library::Track {
             uri: format!("file://{}", track.path),
             duration: None
         }
+    }
+}
+
+impl From<scanner::Track> for Option<library::Album> {
+    fn from(track: scanner::Track) -> Self {
+        track.album.map(|name| library::Album {
+            id: None,
+            title: name,
+            artist_id: None,
+            artist: None,
+            provider: Provider::LocalMedia,
+            image_url: None,
+            uri: String::new(),
+        })
+    }
+}
+
+impl From<scanner::Track> for Option<library::Artist> {
+    fn from(track: scanner::Track) -> Self {
+        track.artist.map(|name| library::Artist {
+            id: None,
+            name,
+            uri: String::new(),
+            image_url: None
+        })
     }
 }

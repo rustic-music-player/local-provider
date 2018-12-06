@@ -1,5 +1,5 @@
-extern crate rustic_core as rustic;
 extern crate failure;
+extern crate rustic_core as rustic;
 #[macro_use]
 extern crate failure_derive;
 extern crate serde;
@@ -7,27 +7,28 @@ extern crate serde;
 extern crate serde_derive;
 #[macro_use]
 extern crate log;
-extern crate walkdir;
 extern crate id3;
+extern crate walkdir;
 
 pub mod scanner;
 
-use rustic::provider::*;
-use rustic::library::{self, SharedLibrary};
 use failure::Error;
+use rustic::library::{self, SharedLibrary};
+use rustic::provider::*;
 
 #[derive(Clone, Deserialize, Debug)]
 pub struct LocalProvider {
-    path: String
+    path: String,
 }
 
 impl ProviderInstance for LocalProvider {
-
     fn title(&self) -> &'static str {
         "Local"
     }
 
-    fn uri_scheme(&self) -> &'static str { "file" }
+    fn uri_scheme(&self) -> &'static str {
+        "file"
+    }
 
     fn setup(&mut self) -> Result<(), Error> {
         Ok(())
@@ -43,10 +44,7 @@ impl ProviderInstance for LocalProvider {
             .filter(|album: &Option<library::Album>| album.is_some())
             .map(|album| album.unwrap())
             .fold(Vec::new(), |mut albums, album| {
-                if albums
-                    .iter()
-                    .find(|a| a.title == album.title)
-                    .is_none() {
+                if albums.iter().find(|a| a.title == album.title).is_none() {
                     albums.push(album);
                 }
                 albums
@@ -56,8 +54,7 @@ impl ProviderInstance for LocalProvider {
             .map(|mut album| -> Result<library::Album, Error> {
                 library.add_album(&mut album)?;
                 Ok(album)
-            })
-            .filter(|a| a.is_ok())
+            }).filter(|a| a.is_ok())
             .map(|a| a.unwrap())
             .collect();
         let mut tracks = tracks
@@ -71,14 +68,13 @@ impl ProviderInstance for LocalProvider {
                     }
                 }
                 t
-            })
-            .collect();
+            }).collect();
         library.add_tracks(&mut tracks)?;
         Ok(SyncResult {
             tracks: tracks.len(),
             albums: albums.len(),
             artists: 0,
-            playlists: 0
+            playlists: 0,
         })
     }
 
@@ -122,13 +118,13 @@ impl From<scanner::Track> for library::Track {
                 id: None,
                 name,
                 uri: String::new(),
-                image_url: None
+                image_url: None,
             }),
             image_url: None,
             stream_url: format!("file://{}", track.path),
             provider: Provider::LocalMedia,
             uri: format!("file://{}", track.path),
-            duration: None
+            duration: None,
         }
     }
 }
@@ -153,7 +149,7 @@ impl From<scanner::Track> for Option<library::Artist> {
             id: None,
             name,
             uri: String::new(),
-            image_url: None
+            image_url: None,
         })
     }
 }

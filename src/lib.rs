@@ -83,11 +83,11 @@ impl ProviderInstance for LocalProvider {
         }
     }
 
-    fn navigate(&self, path: Vec<String>) -> Result<ProviderFolder, Error> {
+    fn navigate(&self, _path: Vec<String>) -> Result<ProviderFolder, Error> {
         Ok(self.root())
     }
 
-    fn search(&self, query: String) -> Result<Vec<ProviderItem>, Error> {
+    fn search(&self, _query: String) -> Result<Vec<ProviderItem>, Error> {
         Ok(vec![])
     }
 

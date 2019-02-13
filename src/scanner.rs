@@ -60,7 +60,7 @@ impl Scanner {
                         }
                         Err(id3::Error {
                             kind: id3::ErrorKind::NoTag,
-                            description: _,
+                            ..
                         }) => Ok(Track {
                             path,
                             title: filename.to_string(),

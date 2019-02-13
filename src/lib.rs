@@ -1,7 +1,5 @@
 extern crate failure;
 extern crate rustic_core as rustic;
-#[macro_use]
-extern crate failure_derive;
 extern crate serde;
 #[macro_use]
 extern crate serde_derive;

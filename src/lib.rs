@@ -1,18 +1,23 @@
 extern crate failure;
+extern crate id3;
+#[macro_use]
+extern crate log;
+#[macro_use]
+extern crate maplit;
 extern crate rustic_core as rustic;
 extern crate serde;
 #[macro_use]
 extern crate serde_derive;
-#[macro_use]
-extern crate log;
-extern crate id3;
 extern crate walkdir;
+
+use failure::Error;
+
+use rustic::library::{self, SharedLibrary};
+use rustic::provider::*;
 
 pub mod scanner;
 
-use failure::Error;
-use rustic::library::{self, SharedLibrary};
-use rustic::provider::*;
+const META_LOCAL_FILE_URL: &'static str = "LOCAL_FILE_URL";
 
 #[derive(Clone, Deserialize, Debug)]
 pub struct LocalProvider {
@@ -98,6 +103,7 @@ impl ProviderInstance for LocalProvider {
 
 impl From<scanner::Track> for library::Track {
     fn from(track: scanner::Track) -> Self {
+        let path = track.path.clone();
         library::Track {
             id: None,
             title: track.title,
@@ -110,6 +116,9 @@ impl From<scanner::Track> for library::Track {
                 provider: Provider::LocalMedia,
                 image_url: None,
                 uri: String::new(),
+                meta: hashmap!(
+                    META_LOCAL_FILE_URL => path.clone().into()
+                ),
             }),
             artist_id: None,
             artist: track.artist.map(|name| library::Artist {
@@ -117,18 +126,25 @@ impl From<scanner::Track> for library::Track {
                 name,
                 uri: String::new(),
                 image_url: None,
+                meta: hashmap!(
+                    META_LOCAL_FILE_URL => path.clone().into()
+                ),
             }),
             image_url: None,
             stream_url: format!("file://{}", track.path),
             provider: Provider::LocalMedia,
             uri: format!("file://{}", track.path),
             duration: None,
+            meta: hashmap!(
+                META_LOCAL_FILE_URL => path.into()
+            ),
         }
     }
 }
 
 impl From<scanner::Track> for Option<library::Album> {
     fn from(track: scanner::Track) -> Self {
+        let path = track.path.clone();
         track.album.map(|name| library::Album {
             id: None,
             title: name,
@@ -137,17 +153,24 @@ impl From<scanner::Track> for Option<library::Album> {
             provider: Provider::LocalMedia,
             image_url: None,
             uri: String::new(),
+            meta: hashmap!(
+                META_LOCAL_FILE_URL => path.into()
+            )
         })
     }
 }
 
 impl From<scanner::Track> for Option<library::Artist> {
     fn from(track: scanner::Track) -> Self {
+        let path = track.path.clone();
         track.artist.map(|name| library::Artist {
             id: None,
             name,
             uri: String::new(),
             image_url: None,
+            meta: hashmap!(
+                META_LOCAL_FILE_URL => path.into()
+            )
         })
     }
 }

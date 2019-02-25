@@ -1,3 +1,4 @@
+#[macro_use]
 extern crate failure;
 extern crate id3;
 #[macro_use]
@@ -31,6 +32,10 @@ impl ProviderInstance for LocalProvider {
 
     fn uri_scheme(&self) -> &'static str {
         "file"
+    }
+
+    fn provider(&self) -> Provider {
+        Provider::LocalMedia
     }
 
     fn setup(&mut self) -> Result<(), Error> {
@@ -99,6 +104,14 @@ impl ProviderInstance for LocalProvider {
     fn resolve_track(&self, _uri: &str) -> Result<Option<library::Track>, Error> {
         Ok(None)
     }
+
+    fn stream_url(&self, track: &library::Track) -> Result<String, Error> {
+        if track.provider == Provider::LocalMedia {
+            return Ok(track.uri.clone());
+        }
+
+        Err(format_err!("Invalid provider: {:?}", track.provider))
+    }
 }
 
 impl From<scanner::Track> for library::Track {
@@ -131,7 +144,6 @@ impl From<scanner::Track> for library::Track {
                 ),
             }),
             image_url: None,
-            stream_url: format!("file://{}", track.path),
             provider: Provider::LocalMedia,
             uri: format!("file://{}", track.path),
             duration: None,

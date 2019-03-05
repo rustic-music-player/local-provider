@@ -1,13 +1,11 @@
-extern crate rustic_local_provider as provider;
-
 #[test]
 fn test_scan() {
-    let scanner = provider::scanner::Scanner::new("assets");
+    let scanner = rustic_local_provider::scanner::Scanner::new("assets");
     let res = scanner.scan().unwrap();
 
     assert_eq!(
         res,
-        vec![provider::scanner::Track {
+        vec![rustic_local_provider::scanner::Track {
             path: "assets/bensound-ukulele.mp3".into(),
             title: "Ukulele".into(),
             artist: Some("Bensound".into()),

@@ -1,20 +1,9 @@
-#[macro_use]
-extern crate failure;
-extern crate id3;
-#[macro_use]
-extern crate log;
-#[macro_use]
-extern crate maplit;
-extern crate rustic_core as rustic;
-extern crate serde;
-#[macro_use]
-extern crate serde_derive;
-extern crate walkdir;
+use failure::{Error, format_err};
+use maplit::hashmap;
+use serde_derive::Deserialize;
 
-use failure::Error;
-
-use rustic::library::{self, SharedLibrary};
-use rustic::provider::*;
+use rustic_core::library::{self, SharedLibrary};
+use rustic_core::provider::*;
 
 pub mod scanner;
 

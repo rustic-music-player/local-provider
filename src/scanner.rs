@@ -1,3 +1,4 @@
+use log::error;
 use failure::Error;
 
 #[derive(Debug, PartialEq, Clone)]
